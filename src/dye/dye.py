@@ -362,7 +362,13 @@ class Dye:
                 # this one is a nested table, skip it
                 continue
             (source, color_def) = pattern.get_color_def(color_name)
-            col1 = rich.text.Text.assemble(("██", color_def), f" {color_name}")
+            resolved_color = pattern.colors[color_name]
+            if resolved_color:
+                # we think there is some definition that isn't empty
+                col1 = rich.text.Text.assemble(("██", resolved_color), f" {color_name}")
+            else:
+                # no definition, don't try to display the color
+                col1 = f" ∅ {color_name}"
             col2 = rich.text.Text(f' = "{color_def}"  # from {source}')
             colors_table.add_row(col1, col2)
         outer_table.add_row(colors_table)
@@ -382,7 +388,10 @@ class Dye:
                 continue
             (source, style_def) = pattern.get_style_def(style_name)
             style = pattern.styles[style_name]
-            col1 = rich.text.Text(style_name, style)
+            if style:
+                col1 = rich.text.Text(style_name, style)
+            else:
+                col1 = rich.text.Text(f"∅ {style_name}")
             col2 = rich.text.Text(f' = "{style_def}"  # from {source}')
             styles_table.add_row(col1, col2)
         outer_table.add_row(styles_table)
