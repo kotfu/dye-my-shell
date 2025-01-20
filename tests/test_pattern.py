@@ -83,6 +83,11 @@ tetrad.third = "foreground_low"
 tetrad.fourth = "{{ color.pattern_purple }}"
 tetrad.fifth = "{{ colors.triad.third }}"
 
+group1.first = "triad.first"
+group1.second = "{{ color.triad.second }}"
+group1.third = "{{ colors.triad.third }}"
+
+
 [styles]
 notyet = "{{ styles.text }}"
 foreground = "{{ color.foreground }}"
@@ -378,6 +383,18 @@ def test_colors_subtable_reference2(sthmpat):
 
 def test_colors_subtable_reference3(sthmpat):
     assert sthmpat.colors["tetrad.fifth"] == "#cccccc"
+
+
+def test_colors_subtable_reference4(sthmpat):
+    assert sthmpat.colors["group1.first"] == sthmpat.colors["triad.first"]
+
+
+def test_colors_subtable_reference5(sthmpat):
+    assert sthmpat.colors["group1.second"] == sthmpat.colors["triad.second"]
+
+
+def test_colors_subtable_reference6(sthmpat):
+    assert sthmpat.colors["group1.third"] == sthmpat.colors["triad.third"]
 
 
 #
