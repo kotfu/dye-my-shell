@@ -40,6 +40,7 @@
 [ ] unit tests in test_pattern.py or test_scope.py for all the processing of a scope
 [ ] see if we can use pygments styles as a theme in dye
 [ ] make -d show debugging output on stderr so you can see what's going on
+[ ] create a generator for less, add to environment variable LESS
 
 
 ## documentation and website
