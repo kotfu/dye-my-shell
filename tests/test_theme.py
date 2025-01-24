@@ -55,6 +55,9 @@ SAMPLE_THEME = """
     tetrad.third = "pink"
     tetrad.fourth = "{{ colors.triad.third }}"
 
+    accent.1 = "orange"
+    accent.two = "pink"
+
     [styles]
     notyet = "{{ styles.foreground }}"
     foreground = "{{ color.foreground }}"
@@ -71,6 +74,9 @@ SAMPLE_THEME = """
     triad.first = "{{ color.green }} on {{ color.pink }}"
     triad.second = "foreground"
     triad.third = "{{ style.triad.first }}"
+
+    accent.1 = "{{ color['accent.1'] }}"
+    accent.2 = "{{ color['accent.two'] }}"
 """
 
 
@@ -334,3 +340,8 @@ def test_styles_subtable_reference1(sthm):
 
 def test_styles_subtable_reference2(sthm):
     assert sthm.styles["triad.third"].color.name == "#50fa7b"
+
+
+def test_styles_subtable_reference3(sthm):
+    assert sthm.styles["accent.1"].color.name == "#ffb86c"
+    assert sthm.styles["accent.2"].color.name == "#ff79c6"

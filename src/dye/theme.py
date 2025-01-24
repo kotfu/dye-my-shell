@@ -107,8 +107,8 @@ class Theme:
         self.colors = benedict()
         merge_and_process_colors(self.colors, raw_colors, env)
 
-        # process the elements, using the colors as variables
-        # each element in should be a rich.Style() object
+        # process the styles, using the colors as variables
+        # each style in should be a rich.Style() object
         try:
             raw_styles = benedict(self.definition["styles"])
         except KeyError:
