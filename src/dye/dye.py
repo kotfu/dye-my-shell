@@ -31,9 +31,10 @@ import rich.box
 import rich.color
 import rich.console
 import rich.errors
-import rich.layout
 import rich.rule
+import rich.layout
 import rich.style
+from benedict import benedict
 from rich_argparse import RichHelpFormatter
 
 from .agents import AgentBase
@@ -50,78 +51,32 @@ class Dye:
     EXIT_ERROR = 1
     EXIT_USAGE = 2
 
-    HELP_ELEMENTS = ["args", "groups", "help", "metavar", "prog", "syntax", "text"]
+    # we call these ELEMENTS instead of STYLES because we already use STYLES for
+    # something else
+    OUTPUT_ELEMENTS = [
+        "usage.args",
+        "usage.groups",
+        "usage.help",
+        "usage.metavar",
+        "usage.prog",
+        "usage.syntax",
+        "usage.text",
+        "ui.border",
+        "ui.header",
+    ]
 
     #
     # initialization and properties
     #
-    def __init__(self, force_color=False):
+    def __init__(self):
         """Construct a new Dye object"""
 
         self.debug = False
 
-        self.console = self._create_console(force_color)
-        self.error_console = self._create_error_console(force_color)
-        self.print_console = self._create_print_console(force_color)
-
-    def _create_console(self, force_color):
-        """create a rich console object to be used for output
-
-        we have this as a separate method so that it can be patched
-        in our test suite
-        """
-        # force_terminal can be True, False, or None
-        # argparse will always set it to be True or False
-        # we need it to be True or None
-        if not force_color:
-            force_color = None
-        return rich.console.Console(
-            soft_wrap=True,
-            markup=False,
-            emoji=False,
-            highlight=False,
-            force_terminal=force_color,
-        )
-
-    def _create_error_console(self, force_color):
-        """create a rich console object to be used for std err
-
-        we have this as a separate method so that it can be patched
-        in our test suite
-        """
-        # force_terminal can be True, False, or None
-        # argparse will always set it to be True or False
-        # we need it to be True or None
-        if not force_color:
-            force_color = None
-        return rich.console.Console(
-            stderr=True,
-            soft_wrap=True,
-            markup=False,
-            emoji=False,
-            highlight=False,
-            force_terminal=force_color,
-        )
-
-    def _create_print_console(self, force_color):
-        """create a rich console object to be used for output for the
-        print command, which enables console markup
-
-        we have this as a separate method so that it can be patched
-        in our test suite
-        """
-        # force_terminal can be True, False, or None
-        # argparse will always set it to be True or False
-        # we need it to be True or None
-        if not force_color:
-            force_color = None
-        return rich.console.Console(
-            soft_wrap=True,
-            markup=True,
-            emoji=False,
-            highlight=False,
-            force_terminal=force_color,
-        )
+        self.console = self._create_console(False)
+        self.error_console = self._create_error_console(False)
+        self.print_console = self._create_print_console(False)
+        self.output_elements = benedict()
 
     @property
     def dye_dir(self):
@@ -151,9 +106,6 @@ class Dye:
     #
     def dispatch(self, prog, args):
         """process and execute all the arguments and options"""
-
-        self.debug = args.debug
-        self.set_help_colors(args)
 
         # now go process everything (order matters)
         try:
@@ -185,78 +137,6 @@ class Dye:
             exit_code = self.EXIT_ERROR
 
         return exit_code
-
-    def set_help_colors(self, args):
-        """set the colors for help output
-
-        if args has a --colors argument, use that
-        if not, use the contents of DYE_COLORS env variable
-
-        DYE_COLORS=args=red bold on black:groups=white on red:
-
-        or --colors='args=red bold on black:groups=white on red'
-        """
-        help_styles = {}
-        try:
-            env_colors = os.environ["DYE_COLORS"]
-        except KeyError:
-            env_colors = None
-
-        # https://no-color.org/
-        try:
-            env_no_color = os.environ["NO_COLOR"]
-        except KeyError:
-            env_no_color = None
-
-        if args.color:
-            # overrides environment variables
-            help_styles = self._parse_colorspec(args.color)
-            self.debug_msg("help styles set from --color")
-        elif args.nocolor:
-            # disable the default color output
-            help_styles = self._parse_colorspec("")
-            self.debug_msg("help styles disabled because of --no-color")
-        elif env_no_color:
-            help_styles = self._parse_colorspec("")
-            self.debug_msg("disabling color output because NO_COLOR is set")
-        elif env_colors == "":
-            # None is different than an empty string
-            # disable the default color output
-            help_styles = self._parse_colorspec("")
-            self.debug_msg(
-                "no color output in help because $DYE_COLORS is an empty string"
-            )
-        elif env_colors:
-            # was set, and was set to a non-empty string
-            help_styles = self._parse_colorspec(env_colors)
-            self.debug_msg("help styles set from $DYE_COLORS")
-        else:
-            self.debug_msg("no styles found for help")
-
-        # now map this all into rich.styles
-        for key, value in help_styles.items():
-            RichHelpFormatter.styles[f"argparse.{key}"] = value
-
-    def _parse_colorspec(self, colorspec):
-        "parse colorspec into a dictionary of styles"
-        colors = {}
-        # set everything to default, ie smash all the default colors
-        for element in self.HELP_ELEMENTS:
-            colors[element] = "default"
-
-        clauses = colorspec.split(":")
-        for clause in clauses:
-            parts = clause.split("=", 1)
-            if len(parts) == 2:
-                element = parts[0]
-                styledef = parts[1]
-                if element in self.HELP_ELEMENTS:
-                    colors[element] = styledef
-            else:
-                # invalid syntax, too many equals signs
-                # ignore this clause
-                pass
-        return colors
 
     #
     # functions for the various commands called by dispatch()
@@ -432,14 +312,30 @@ class Dye:
                 desc = desc.split("\n", maxsplit=1)[0]
             agents[name] = desc
 
+        border_style = None
+        with contextlib.suppress(KeyError):
+            border_style = self.output_elements["ui.border"]
+
+        header_style = None
+        with contextlib.suppress(KeyError):
+            header_style = self.output_elements["ui.header"]
+
         table = rich.table.Table(
-            box=rich.box.SIMPLE_HEAD, show_edge=False, pad_edge=False
+            box=rich.box.ROUNDED,
+            border_style=border_style,
+            header_style=header_style,
         )
         table.add_column("Agent")
         table.add_column("Description")
 
         for agent in sorted(agents):
             table.add_row(agent, agents[agent])
+
+        # panel = rich.panel.Panel(
+        # table,
+        # border_style="yellow on blue",
+        # )
+
         self.console.print(table)
 
         return self.EXIT_SUCCESS
@@ -470,10 +366,157 @@ class Dye:
     # supporting methods
     #
 
+    def _create_console(self, force_color):
+        """create a rich console object to be used for output
+
+        we have this as a separate method so that it can be patched
+        in our test suite
+        """
+        # force_terminal can be True, False, or None
+        # argparse will always set it to be True or False
+        # we need it to be True or None
+        if not force_color:
+            force_color = None
+        return rich.console.Console(
+            soft_wrap=True,
+            markup=False,
+            emoji=False,
+            highlight=False,
+            force_terminal=force_color,
+        )
+
+    def _create_error_console(self, force_color):
+        """create a rich console object to be used for std err
+
+        we have this as a separate method so that it can be patched
+        in our test suite
+        """
+        # force_terminal can be True, False, or None
+        # argparse will always set it to be True or False
+        # we need it to be True or None
+        if not force_color:
+            force_color = None
+        return rich.console.Console(
+            stderr=True,
+            soft_wrap=True,
+            markup=False,
+            emoji=False,
+            highlight=False,
+            force_terminal=force_color,
+        )
+
+    def _create_print_console(self, force_color):
+        """create a rich console object to be used for output for the
+        print command, which enables console markup
+
+        we have this as a separate method so that it can be patched
+        in our test suite
+        """
+        # force_terminal can be True, False, or None
+        # argparse will always set it to be True or False
+        # we need it to be True or None
+        if not force_color:
+            force_color = None
+        return rich.console.Console(
+            soft_wrap=True,
+            markup=True,
+            emoji=False,
+            highlight=False,
+            force_terminal=force_color,
+        )
+
     def debug_msg(self, msg):
         """print the message to stderr if debug is enabled"""
         if self.debug:
             self.error_console.print(f"[debug] {msg}")
+
+    def set_output_elements(self):
+        """set the color elements for all our output
+
+        Use the contents of DYE_COLORS env variable
+
+        DYE_COLORS=args=red bold on black:groups=white on red:
+        """
+        self.output_elements = benedict()
+        try:
+            env_colors = os.environ["DYE_COLORS"]
+        except KeyError:
+            env_colors = None
+
+        # https://no-color.org/
+        try:
+            env_no_color = os.environ["NO_COLOR"]
+        except KeyError:
+            env_no_color = None
+
+        if env_no_color:
+            # help_styles = self._parse_colorspec("")
+            self.debug_msg("no color output because NO_COLOR is set")
+        elif env_colors:
+            # was set, and was set to a non-empty string
+            self.output_elements = self._parse_colorspec(env_colors)
+            self.debug_msg("output colors set from $DYE_COLORS")
+        elif env_colors == "":
+            # None is different than an empty string
+            # disable the default color output
+            # help_styles = self._parse_colorspec("")
+            self.debug_msg("no color output because $DYE_COLORS is an empty string")
+        else:
+            self.debug_msg("no color output because $DYE_COLORS is not set")
+
+        # transfer the usage elements into RichHelpFormatter
+        RichHelpFormatter.styles = {}
+        with contextlib.suppress(KeyError):
+            for key, value in self.output_elements["usage"].items():
+                RichHelpFormatter.styles[f"argparse.{key}"] = value
+
+    def _parse_colorspec(self, colorspec):
+        "parse colorspec into a benedict of elements and styles"
+        colors = benedict()
+        ## set everything to default, ie smash all the default colors
+        for element in self.OUTPUT_ELEMENTS:
+            colors[element] = "default"
+
+        clauses = colorspec.split(":")
+        for clause in clauses:
+            parts = clause.split("=", 1)
+            if len(parts) == 2:
+                element = parts[0]
+                styledef = parts[1]
+                if element in self.OUTPUT_ELEMENTS:
+                    colors[element] = styledef
+                else:
+                    self.debug_msg(f"'{element}' is not a valid output element")
+            else:
+                # invalid syntax, too many equals signs
+                # ignore this clause
+                self.debug_msg(f"could not parse '{clause}' as a color definition")
+        return colors
+
+    def parse_args(self, argv=None):
+        """parse argv and return prog and args
+
+        also parses environment variables and sets:
+
+        self.output_elements
+        self.debug
+        self.console
+        self.error_console
+        self.print_console
+        """
+        self.set_output_elements()
+
+        argparser = self.argparser()
+        args = argparser.parse_args(argv)
+
+        self.debug = args.debug
+
+        if args.force_color:
+            self.console = self._create_console(True)
+            self.error_console = self._create_error_console(True)
+            self.print_console = self._create_print_console(True)
+
+        return (argparser.prog, args)
 
     def load_theme_from_args(self, args, required=True):
         """Load a theme from the command line args
@@ -569,8 +612,7 @@ class Dye:
         return Pattern()
 
     #
-    # static methods for running from the command line
-    # main() below is called from src/dye/__main__.py
+    # methods for running from the command line and parsing arguments
     #
     @staticmethod
     def main(argv=None):
@@ -578,19 +620,15 @@ class Dye:
 
         parse arguments and call dispatch() for processing
         """
-
-        parser = Dye.argparser()
+        dye = Dye()
         try:
-            args = parser.parse_args(argv)
+            (prog, args) = dye.parse_args(argv)
         except SystemExit as exc:
             return exc.code
 
-        # create an instance of ourselves
-        thm = Dye(force_color=args.force_color)
-        return thm.dispatch(parser.prog, args)
+        return dye.dispatch(prog, args)
 
-    @staticmethod
-    def argparser():
+    def argparser(self):
         """Build the argument parser"""
 
         RichHelpFormatter.usage_markup = True
@@ -625,15 +663,6 @@ class Dye:
             help=version_help,
         )
 
-        # colors
-        cgroup = parser.add_mutually_exclusive_group()
-        nocolor_help = "disable color in help output, overrides $DYE_COLORS"
-        cgroup.add_argument(
-            "--no-color", dest="nocolor", action="store_true", help=nocolor_help
-        )
-        color_help = "provide a color specification for help output"
-        cgroup.add_argument("--color", metavar="<colorspec>", help=color_help)
-
         forcecolor_help = (
             "force color output even if standard output is not a terminal"
             " (i.e. if it's a file or a pipe to less)"
@@ -655,17 +684,16 @@ class Dye:
             help="command to perform, which must be one of the following:",
         )
 
-        Dye._argparser_apply(subparsers)
-        Dye._argparser_preview(subparsers)
-        Dye._argparser_print(subparsers)
-        Dye._argparser_agents(subparsers)
-        Dye._argparser_themes(subparsers)
-        Dye._argparser_help(subparsers)
+        self._argparser_apply(subparsers)
+        self._argparser_preview(subparsers)
+        self._argparser_print(subparsers)
+        self._argparser_agents(subparsers)
+        self._argparser_themes(subparsers)
+        self._argparser_help(subparsers)
 
         return parser
 
-    @staticmethod
-    def _argparser_apply(subparsers):
+    def _argparser_apply(self, subparsers):
         # apply command
         cmdhelp = "apply a theme"
         parser = subparsers.add_parser(
@@ -690,8 +718,7 @@ class Dye:
         comment_help = "add comments to the generated shell output"
         parser.add_argument("-c", "--comment", action="store_true", help=comment_help)
 
-    @staticmethod
-    def _argparser_preview(subparsers):
+    def _argparser_preview(self, subparsers):
         """Add a subparser for the preview command"""
         cmd_help = "show a preview of the styles in a theme"
         parser = subparsers.add_parser(
@@ -718,8 +745,7 @@ class Dye:
         no_theme_help = "don't load any theme, ignores DYE_THEME_FILE"
         theme_group.add_argument("--no-theme", action="store_true", help=no_theme_help)
 
-    @staticmethod
-    def _argparser_print(subparsers):
+    def _argparser_print(self, subparsers):
         """Add a subparser for the print command"""
         desc = """
             Print text using styles from a theme or pattern.
@@ -760,8 +786,7 @@ class Dye:
         string_help = "strings to be printed"
         parser.add_argument("string", nargs="*", help=string_help)
 
-    @staticmethod
-    def _argparser_agents(subparsers):
+    def _argparser_agents(self, subparsers):
         """Add a subparser for the agents command"""
         # agents command
         agents_help = "list all known agents"
@@ -772,8 +797,7 @@ class Dye:
             help=agents_help,
         )
 
-    @staticmethod
-    def _argparser_themes(subparsers):
+    def _argparser_themes(self, subparsers):
         """Add a subparser for the themes command"""
         themes_help = "list available themes"
         subparsers.add_parser(
@@ -783,8 +807,7 @@ class Dye:
             help=themes_help,
         )
 
-    @staticmethod
-    def _argparser_help(subparsers):
+    def _argparser_help(self, subparsers):
         """Add a subparser for the help command"""
         help_help = "display this usage message"
         subparsers.add_parser(

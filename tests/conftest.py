@@ -94,19 +94,21 @@ def dye_cmdline(mocker):
         width=2048,
     )
 
-    dye = Dye()
-
     def _executor(cmdline, theme_toml=None, pattern_toml=None):
+        """anything that outputs here doesn't get captured by the
+        capsys fixture"""
         if isinstance(cmdline, str):
             argv = cmdline.split(" ")
         elif isinstance(cmdline, list):
             argv = cmdline
         else:
             argv = []
+
+        dye = Dye()
         try:
-            args = dye.argparser().parse_args(argv)
-        except SystemExit as err:
-            return err.code
+            (prog, args) = dye.parse_args(argv)
+        except SystemExit as exc:
+            return exc.code
 
         # create theme and pattern objects from the toml we were given
         theme = Theme.loads(theme_toml)

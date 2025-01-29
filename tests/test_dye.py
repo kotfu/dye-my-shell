@@ -35,44 +35,26 @@ from dye import __main__ as mainmodule
 #
 # test output color logic
 #
-def test_output_color_cmdline(dye_cmdline, mocker):
-    # command line color arguments should override
-    # all environment variables
-    RichHelpFormatter.styles["argparse.text"] = "#000000"
-    envs = {"DYE_COLORS": "text=#f0f0f0", "NO_COLOR": "doesn't matter"}
-    mocker.patch.dict(os.environ, envs, clear=True)
-    argv = [
-        "--help",
-        "--color=text=#ffff00:args=#bd93f9:metavar=#f8f8f2 on #44475a bold",
-    ]
-    dye_cmdline(argv)
-    assert RichHelpFormatter.styles["argparse.text"] == "#ffff00"
-    assert RichHelpFormatter.styles["argparse.args"] == "#bd93f9"
-    assert RichHelpFormatter.styles["argparse.metavar"] == "#f8f8f2 on #44475a bold"
-
-
 def test_output_color_no_color_env(dye_cmdline, mocker):
     RichHelpFormatter.styles["argparse.text"] = "#ff00ff"
     mocker.patch.dict(os.environ, {"NO_COLOR": "doesn't matter"}, clear=True)
     dye_cmdline("--help")
-    for element in Dye.HELP_ELEMENTS:
-        assert RichHelpFormatter.styles[f"argparse.{element}"] == "default"
+    assert not RichHelpFormatter.styles
 
 
 def test_output_color_envs_only(dye_cmdline, mocker):
     # NO_COLOR should override DYE_COLORS
     RichHelpFormatter.styles["argparse.text"] = "#333333"
-    envs = {"DYE_COLORS": "text=#f0f0f0", "NO_COLOR": "doesn't matter"}
+    envs = {"DYE_COLORS": "usage.text=#f0f0f0", "NO_COLOR": "doesn't matter"}
     mocker.patch.dict(os.environ, envs, clear=True)
     dye_cmdline("--help")
-    for element in Dye.HELP_ELEMENTS:
-        assert RichHelpFormatter.styles[f"argparse.{element}"] == "default"
+    assert not RichHelpFormatter.styles
 
 
 def test_output_color_env_color(dye_cmdline, mocker):
     # DYE_COLORS should override default colors
     RichHelpFormatter.styles["argparse.text"] = "#333333"
-    mocker.patch.dict(os.environ, {"DYE_COLORS": "text=#f0f0f0"}, clear=True)
+    mocker.patch.dict(os.environ, {"DYE_COLORS": "usage.text=#f0f0f0"}, clear=True)
     dye_cmdline("--help")
     assert RichHelpFormatter.styles["argparse.text"] == "#f0f0f0"
 
@@ -81,19 +63,8 @@ def test_output_color_env_empty(dye_cmdline, mocker):
     # DYE_COLORS should override default colors
     RichHelpFormatter.styles["argparse.text"] = "#ff00ff"
     mocker.patch.dict(os.environ, {"DYE_COLORS": ""}, clear=True)
-    # mocker.patch.dict(os.environ, )
     dye_cmdline("--help")
-    assert RichHelpFormatter.styles["argparse.text"] == "default"
-
-
-def test_output_color_no_color_cmdline(dye_cmdline, mocker):
-    # --no-color should override DYE_COLORS
-    RichHelpFormatter.styles["argparse.text"] = "#333333"
-    envs = {"DYE_COLORS": "text=#f0f0f0"}
-    mocker.patch.dict(os.environ, envs, clear=True)
-    dye_cmdline("--help --no-color")
-    for element in Dye.HELP_ELEMENTS:
-        assert RichHelpFormatter.styles[f"argparse.{element}"] == "default"
+    assert not RichHelpFormatter.styles
 
 
 #
@@ -105,7 +76,7 @@ def test_help_option(dye_cmdline, capsys):
     out, err = capsys.readouterr()
     assert not err
     assert "preview" in out
-    assert "--no-color" in out
+    assert "--force-color" in out
 
 
 def test_h_option(dye_cmdline, capsys):
@@ -114,7 +85,7 @@ def test_h_option(dye_cmdline, capsys):
     out, err = capsys.readouterr()
     assert not err
     assert "preview" in out
-    assert "--no-color" in out
+    assert "--force-color" in out
 
 
 def test_version_option(dye_cmdline, capsys):
@@ -153,7 +124,7 @@ def test_no_command(dye_cmdline, capsys):
     # check a few things in the usage message
     assert "apply" in err
     assert "preview" in err
-    assert "--no-color" in err
+    assert "--force-color" in err
     assert "-v" in err
 
 
@@ -166,7 +137,7 @@ def test_help_command(dye_cmdline, capsys):
     # if you ask for help, help should be on standard output
     assert "apply" in out
     assert "preview" in out
-    assert "--no-color" in out
+    assert "--force-color" in out
     assert "-v" in out
 
 
@@ -180,14 +151,19 @@ def test_unknown_command(dye_cmdline, capsys):
     assert "invalid choice" in err
 
 
-def test_debug(dye_cmdline, capsys):
+def test_debug(capsys):
     # use the print command to make sure debug generates output
+    # we don't use the dye_cmdline fixture because in this case
+    # the debug output is generated in the dye_cmdline fixture
     msg = "Hello there. General Kenobi."
-    exit_code = dye_cmdline(f"-d print {msg}")
+    dye = Dye()
+    argv = ["-d", "print", msg]
+    (_, args) = dye.parse_args(argv)
+    exit_code = dye.dispatch("dye", args)
     out, err = capsys.readouterr()
     assert exit_code == Dye.EXIT_SUCCESS
     # we should have some debug info
-    assert err
+    assert "[debug]" in err
     assert out == f"{msg}\n"
 
 
@@ -273,9 +249,8 @@ def test_load_theme_from_args_apply1(argv, mocker):
     # argv = "apply"
     # required = True and False
     mocker.patch.dict(os.environ, {}, clear=True)
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
 
     with pytest.raises(DyeError):
         dye.load_theme_from_args(args, required=True)
@@ -290,9 +265,8 @@ def test_load_theme_from_args_apply2(mocker):
     # required = False
     argv = "apply --no-theme"
     mocker.patch.dict(os.environ, {}, clear=True)
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
 
     with pytest.raises(DyeError):
         dye.load_theme_from_args(args, required=True)
@@ -320,9 +294,8 @@ def test_load_theme_from_args_apply3(mocker, tmp_path):
 
     argv = f"apply --theme-file {themefile}"
 
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
 
     theme = dye.load_theme_from_args(args, required=True)
     assert isinstance(theme.styles["text"], rich.style.Style)
@@ -343,9 +316,9 @@ def test_load_theme_from_args_apply4(mocker, tmp_path):
 
     argv = f"apply --theme-file {themefile}"
 
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
+
     with pytest.raises(FileNotFoundError):
         dye.load_theme_from_args(args, required=True)
     with pytest.raises(FileNotFoundError):
@@ -369,9 +342,9 @@ def test_load_theme_from_args_apply5(mocker, tmp_path):
     mocker.patch.dict(os.environ, {"DYE_THEME_FILE": f"{themefile}"}, clear=True)
 
     argv = "apply"
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
+
     theme = dye.load_theme_from_args(args, required=True)
     assert isinstance(theme.styles["text"], rich.style.Style)
     theme = dye.load_theme_from_args(args, required=False)
@@ -403,9 +376,8 @@ def test_load_theme_from_args_apply6(mocker, tmp_path):
         fvar.write(toml)
 
     argv = f"apply --theme-file {cmdfile}"
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
 
     theme = dye.load_theme_from_args(args, required=True)
     assert isinstance(theme.styles["current_line"], rich.style.Style)
@@ -433,9 +405,9 @@ def test_load_theme_from_args_apply7(mocker, tmp_path):
     mocker.patch.dict(os.environ, {"DYE_THEME_FILE": f"{themefile}"}, clear=True)
 
     argv = "apply --no-theme"
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
+
     with pytest.raises(DyeError):
         dye.load_theme_from_args(args, required=True)
     theme = dye.load_theme_from_args(args, required=False)
@@ -455,9 +427,8 @@ def test_load_pattern_from_args1(mocker):
     # required = True and False
     argv = "print"
     mocker.patch.dict(os.environ, {}, clear=True)
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
 
     with pytest.raises(DyeError):
         dye.load_pattern_from_args(args, required=True)
@@ -473,9 +444,8 @@ def test_load_pattern_from_args2(mocker):
     # required = False
     argv = "print --no-pattern"
     mocker.patch.dict(os.environ, {}, clear=True)
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
 
     with pytest.raises(DyeError):
         dye.load_pattern_from_args(args, required=True)
@@ -501,10 +471,8 @@ def test_load_pattern_from_args3(mocker, tmp_path):
         fvar.write(toml)
 
     argv = f"print --pattern-file {pattern_file}"
-
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
 
     theme = dye.load_pattern_from_args(args, required=True)
     assert isinstance(theme.styles["text"], rich.style.Style)
@@ -523,10 +491,9 @@ def test_load_pattern_from_args4(mocker, tmp_path):
     pattern_file = tmp_path / "doesntexistpattern.toml"
 
     argv = f"print --pattern-file {pattern_file} something"
-
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
+
     with pytest.raises(FileNotFoundError):
         dye.load_pattern_from_args(args, required=True)
     with pytest.raises(FileNotFoundError):
@@ -549,9 +516,9 @@ def test_load_pattern_from_args5(mocker, tmp_path):
     mocker.patch.dict(os.environ, {"DYE_PATTERN_FILE": f"{pattern_file}"}, clear=True)
 
     argv = "apply"
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
+
     theme = dye.load_pattern_from_args(args, required=True)
     assert isinstance(theme.styles["text"], rich.style.Style)
     theme = dye.load_pattern_from_args(args, required=False)
@@ -582,9 +549,8 @@ def test_load_pattern_from_args6(mocker, tmp_path):
         fvar.write(toml)
 
     argv = f"print --pattern-file {cmdfile}"
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
 
     theme = dye.load_pattern_from_args(args, required=True)
     assert isinstance(theme.styles["current_line"], rich.style.Style)
@@ -611,9 +577,9 @@ def test_load_pattern_from_args7(mocker, tmp_path):
     mocker.patch.dict(os.environ, {"DYE_PATTERN_FILE": f"{pattern_file}"}, clear=True)
 
     argv = "print --no-pattern"
-    argparser = Dye.argparser()
-    args = argparser.parse_args(argv.split())
     dye = Dye()
+    (_, args) = dye.parse_args(argv.split())
+
     with pytest.raises(DyeError):
         dye.load_pattern_from_args(args, required=True)
     theme = dye.load_pattern_from_args(args, required=False)

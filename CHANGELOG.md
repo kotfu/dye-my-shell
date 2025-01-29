@@ -16,6 +16,11 @@ and the format of this file follows recommendations from
 
 - `dye preview` can now show patterns and styles
 
+### Removed
+
+- `--color` option removed from `dye` because you can't reliably set usage
+  colors from a command line option.
+
 ### Fixed
 
 - `dye preview` crashed if you had nested colors or styles

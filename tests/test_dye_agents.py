@@ -47,6 +47,6 @@ def test_agents(dye_cmdline, capsys):
     # under the header
     lines = out.splitlines()
     # this is the header row
-    assert "Agent" in lines[0]
-    # +2 for the header line and the horizontal bar under the header line
-    assert len(lines) == len(expected_agents) + 2
+    assert "Agent" in lines[1]
+    # +4 for the top border, bottom border, header words, and line under the header words
+    assert len(lines) == len(expected_agents) + 4
