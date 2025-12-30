@@ -62,7 +62,7 @@ class Dye:
         "usage.syntax",
         "usage.text",
         "ui.border",
-        "ui.header",
+        "ui.column_header",
     ]
 
     #
@@ -318,7 +318,7 @@ class Dye:
 
         header_style = None
         with contextlib.suppress(KeyError):
-            header_style = self.output_elements["ui.header"]
+            header_style = self.output_elements["ui.column_header"]
 
         table = rich.table.Table(
             box=rich.box.ROUNDED,
@@ -473,9 +473,9 @@ class Dye:
     def _parse_colorspec(self, colorspec):
         "parse colorspec into a benedict of elements and styles"
         colors = benedict()
-        ## set everything to default, ie smash all the default colors
-        for element in self.OUTPUT_ELEMENTS:
-            colors[element] = "default"
+        ### set everything to default, ie smash all the default colors
+        # for element in self.OUTPUT_ELEMENTS:
+        #    colors[element] = "default"
 
         clauses = colorspec.split(":")
         for clause in clauses:
