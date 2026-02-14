@@ -43,7 +43,7 @@ def test_dye_multiple_styles(dye_cmdline, capsys):
         [scopes.my_dye]
         agent = "dye"
         style.usage_metavar = "#ffb86c"
-        style.ui_border = "#bd93f9"
+        styles.ui_border = "#bd93f9"
     """
     exit_code = dye_cmdline("apply", None, pattern_str)
     out, err = capsys.readouterr()
