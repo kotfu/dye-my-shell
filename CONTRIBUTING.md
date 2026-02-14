@@ -4,22 +4,19 @@
 
 Clone the repo from github:
 ```
-$ git clone git@github.com:kotfu/shell-themer.git
+$ git clone git@github.com:kotfu/dye-your-shell.git
 ```
 
 
-## Install Dependencies
+## Install Tools and Dependencies
 
-You'll need python 3.9 or higher. You should probably create a virtual
-environment first too.
+This project uses [uv](https://github.com/astral-sh/uv)
 
-Install all the development dependencies:
+```bash
+$ uv python 3.14
+$ uv venv
+$ uv pip install -e .[dev]
 ```
-$ pip install -e .[dev]
-```
-
-This installs the tomcatmanager package "in-place", so the package points to the
-source code instead of copying files to the python `site-packages` folder.
 
 
 ## Branches, Tags, and Versions
@@ -87,14 +84,11 @@ $ pytest
 
 ## Code Quality
 
-Use `pylint` to check code quality. The pylint config is in `pyproject.toml`
+Use `ruff` to check code quality. The pylint config is in `pyproject.toml`
 can be used for both the tests and package:
 ```
-$ pylint src tests
+$ ruff check *.py src/dye tests
 ```
-
-You are welcome to use the pylint comment directives to disable certain messages in
-the code, but pull requests containing these directives will be carefully scrutinized.
 
 
 ## Code Formatting
@@ -181,5 +175,5 @@ $ invoke pypi
 2.  Add an **Unreleased** section to the top of `CHANGELOG.md`. Push the
     change to github.
 
-3.  Run `$ pip install -e .[dev]` to ensure your venv gets an updated
+3.  Run `$ uv pip install -e .[dev]` to ensure your venv gets an updated
     development version string

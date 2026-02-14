@@ -50,11 +50,7 @@ dev = [
     "pytest-mock",
     "pytest-cov",
     "codecov",
-    "pylint",
     "ruff",
-    "wheel",
-    "twine",
-    "rope",
     "invoke",
 ]
 
@@ -65,7 +61,6 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
 
 [project.scripts]
 dye = "dye.dye:Dye.main"
@@ -78,24 +73,11 @@ repository = "https://github.com/kotfu/dye-your-shell"
 testpaths = ["tests"]
 addopts = "--cov-report=term-missing --cov=src/dye"
 
-
-[tool.pylint."MESSAGES CONTROL"]
-
-# Only show warnings with the listed confidence levels. Leave empty to show
-# all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED.
-confidence = ''
-
-# Disable the message, report, category or checker with the given id(s). You
-# can either give multiple identifiers separated by comma (,) or put this
-# option multiple times (only on the command line, not in the configuration
-# file where it should appear only once). You can also use "--disable=all" to
-# disable everything first and then reenable specific checks. For example, if
-# you want to run only the similarities checker, you can use "--disable=all
-# --enable=similarities". If you want to run only the classes checker, but have
-# no Warning level messages displayed, use "--disable=all --enable=classes
-# --disable=W".
-disable = '''duplicate-code,
-'''
+[[tool.uv.index]]
+name = "test-pypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
 
 [tool.ruff]
 line-length = 88
