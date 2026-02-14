@@ -528,7 +528,7 @@ class Dye:
         doesn't exist or can't be opened
 
         Resolution order:
-        1. --themefile, -t from the command line
+        1. --theme-file, -t from the command line
         2. $DYE_THEME_FILE environment variable
 
         This returns a theme object
@@ -567,7 +567,7 @@ class Dye:
         """load a pattern file from the args
 
         Resolution order:
-        1. --patternfile -f from the command line
+        1. --pattern-file -f from the command line
         2. $DYE_PATTERN_FILE environment variable
 
         This returns a pattern object
