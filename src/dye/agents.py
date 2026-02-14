@@ -129,6 +129,23 @@ class LsColorsFromStyle:
         return mapname, f"{mapname}={ansicodes}"
 
 
+class Dye(AgentBase):
+    "Set DYE_COLORS environment variable for dye's own color output"
+
+    def run(self, comments=False) -> str:
+        outlist = []
+        # get raw style definitions, styles overrides style
+        raw_styles = {}
+        with contextlib.suppress(KeyError, TypeError):
+            raw_styles.update(self.scope.definition["style"])
+        with contextlib.suppress(KeyError, TypeError):
+            raw_styles.update(self.scope.definition["styles"])
+        for name, styledef in raw_styles.items():
+            if isinstance(styledef, str):
+                outlist.append(f"{name}={styledef}")
+        return f'export DYE_COLORS="{":".join(outlist)}"'
+
+
 class EnvironmentVariables(AgentBase):
     "Export and unset environment variables"
 

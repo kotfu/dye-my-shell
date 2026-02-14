@@ -34,6 +34,7 @@ def test_agents(dye_cmdline, capsys):
     assert exit_code == Dye.EXIT_SUCCESS
     assert not err
     expected_agents = [
+        "dye",
         "environment_variables",
         "eza",
         "fzf",

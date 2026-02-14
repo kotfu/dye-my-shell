@@ -31,8 +31,8 @@ import rich.box
 import rich.color
 import rich.console
 import rich.errors
-import rich.rule
 import rich.layout
+import rich.rule
 import rich.style
 from benedict import benedict
 from rich_argparse import RichHelpFormatter
@@ -54,15 +54,15 @@ class Dye:
     # we call these ELEMENTS instead of STYLES because we already use STYLES for
     # something else
     OUTPUT_ELEMENTS = [
-        "usage.args",
-        "usage.groups",
-        "usage.help",
-        "usage.metavar",
-        "usage.prog",
-        "usage.syntax",
-        "usage.text",
-        "ui.border",
-        "ui.column_header",
+        "usage_args",
+        "usage_groups",
+        "usage_help",
+        "usage_metavar",
+        "usage_prog",
+        "usage_syntax",
+        "usage_text",
+        "ui_border",
+        "ui_column_header",
     ]
 
     #
@@ -314,11 +314,11 @@ class Dye:
 
         border_style = None
         with contextlib.suppress(KeyError):
-            border_style = self.output_elements["ui.border"]
+            border_style = self.output_elements["ui_border"]
 
         header_style = None
         with contextlib.suppress(KeyError):
-            header_style = self.output_elements["ui.column_header"]
+            header_style = self.output_elements["ui_column_header"]
 
         table = rich.table.Table(
             box=rich.box.ROUNDED,
@@ -435,7 +435,7 @@ class Dye:
 
         Use the contents of DYE_COLORS env variable
 
-        DYE_COLORS=args=red bold on black:groups=white on red:
+        DYE_COLORS=usage_args=red bold on black:usage_groups=white on red:
         """
         self.output_elements = benedict()
         try:
@@ -466,9 +466,10 @@ class Dye:
 
         # transfer the usage elements into RichHelpFormatter
         RichHelpFormatter.styles = {}
-        with contextlib.suppress(KeyError):
-            for key, value in self.output_elements["usage"].items():
-                RichHelpFormatter.styles[f"argparse.{key}"] = value
+        for key, value in self.output_elements.items():
+            if key.startswith("usage_"):
+                argparse_key = key[len("usage_") :]
+                RichHelpFormatter.styles[f"argparse.{argparse_key}"] = value
 
     def _parse_colorspec(self, colorspec):
         "parse colorspec into a benedict of elements and styles"
