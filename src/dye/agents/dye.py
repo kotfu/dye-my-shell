@@ -24,8 +24,6 @@
 dye dyes itself using this dye agent
 """
 
-import contextlib
-
 from .base import AgentBase
 
 
