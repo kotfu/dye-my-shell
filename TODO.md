@@ -42,6 +42,11 @@
 [ ] make -d show debugging output on stderr so you can see what's going on
 [ ] create a generator for less, add to environment variable LESS
 
+## agents
+
+[ ] ripgrep to set RG_COLORS
+[ ]
+
 
 ## documentation and website
   - show how to set BAT_THEME
