@@ -32,8 +32,8 @@ class Theme:
     """load and parse a toml file into a theme object"""
 
     # class methods to create a new theme
-    @staticmethod
-    def loads(tomlstring=None):
+    @classmethod
+    def loads(cls, tomlstring=None):
         """Process a given string as a theme and return a new theme object"""
         if tomlstring:  # noqa: SIM108
             toparse = tomlstring
@@ -46,8 +46,8 @@ class Theme:
         theme._process()
         return theme
 
-    @staticmethod
-    def load(fobj, filename=None):
+    @classmethod
+    def load(cls, fobj, filename=None):
         """Process a file object as a theme and return a new theme object
 
         Pass the optional filename to put in the .filename property
