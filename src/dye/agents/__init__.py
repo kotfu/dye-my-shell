@@ -19,19 +19,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-"""agent implementations and their base class"""
+"""agent implementations and their base classes
 
-import importlib
-import pkgutil
+When you add an agent class, you must add it here
+"""
 
 from .base import AgentBase, LsColorsFromStyle
-
-# auto-import all modules in this package so agents register via __init_subclass__
-for _, _module_name, _ in pkgutil.walk_packages(__path__):
-    if _module_name != "base":
-        importlib.import_module(f".{_module_name}", __name__)
-
-# re-export agent classes for direct access as dye.agents.ClassName
 from .dye import Dye
 from .environment_variables import EnvironmentVariables
 from .eza import Eza
@@ -39,3 +32,15 @@ from .fzf import Fzf
 from .iterm import Iterm
 from .ls_colors import LsColors
 from .shell import Shell
+
+__all__ = [
+    "AgentBase",
+    "LsColorsFromStyle",
+    "Dye",
+    "EnvironmentVariables",
+    "Eza",
+    "Fzf",
+    "Iterm",
+    "LsColors",
+    "Shell",
+]
