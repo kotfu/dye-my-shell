@@ -59,12 +59,55 @@ def test_output_color_env_color(dye_cmdline, mocker):
     assert RichHelpFormatter.styles["argparse.text"] == "#f0f0f0"
 
 
+def test_output_color_force(mocker):
+    create_console = mocker.patch("dye.Dye._create_console")
+    create_error_console = mocker.patch("dye.Dye._create_error_console")
+    create_print_console = mocker.patch("dye.Dye._create_print_console")
+    dye = Dye()
+    # reset so we only track calls from parse_args, not the constructor
+    create_console.reset_mock()
+    create_error_console.reset_mock()
+    create_print_console.reset_mock()
+    dye.parse_args(["--force-color", "agents"])
+    create_console.assert_called_once_with(True)
+    create_error_console.assert_called_once_with(True)
+    create_print_console.assert_called_once_with(True)
+
+
 def test_output_color_env_empty(dye_cmdline, mocker):
     # DYE_COLORS should override default colors
     RichHelpFormatter.styles["argparse.text"] = "#ff00ff"
     mocker.patch.dict(os.environ, {"DYE_COLORS": ""}, clear=True)
     dye_cmdline("--help")
     assert not RichHelpFormatter.styles
+
+
+def test_output_color_env_unknown_element(dye_cmdline, mocker, capsys):
+    mocker.patch.dict(
+        os.environ,
+        {"DYE_COLORS": "homer_simpson=red bold on black:fred=white"},
+    )
+    msg = "It's Wednesday my dudes."
+    exit_code = dye_cmdline(f"-d print {msg}")
+    out, err = capsys.readouterr()
+    assert "[debug]" in err
+    assert "skipping invalid element" in err
+    assert msg in out
+    assert exit_code == 0
+
+
+def test_output_color_env_parse_error(dye_cmdline, mocker, capsys):
+    mocker.patch.dict(
+        os.environ,
+        {"DYE_COLORS": "usage_help=red:usage_args red bold on black white"},
+    )
+    msg = "It's Wednesday my dudes."
+    exit_code = dye_cmdline(f"-d print {msg}")
+    out, err = capsys.readouterr()
+    assert "[debug]" in err
+    assert "skipping invalid expression" in err
+    assert msg in out
+    assert exit_code == 0
 
 
 #
@@ -152,17 +195,18 @@ def test_unknown_command(dye_cmdline, capsys):
 
 
 def test_debug(capsys):
-    # use the print command to make sure debug generates output
-    # we don't use the dye_cmdline fixture because in this case
-    # the debug output is generated in the dye_cmdline fixture
+    # we don't use the dye_cmdline fixture because the debug output
+    # is generated during dispatch, before the fixture can capture it;
+    # we use --no-theme and --no-pattern to make sure the test isn't
+    # reading any theme/pattern files the developer has set in their
+    # environment
     msg = "Hello there. General Kenobi."
     dye = Dye()
-    argv = ["-d", "print", msg]
+    argv = ["-d", "print", "--no-theme", "--no-pattern", msg]
     (_, args) = dye.parse_args(argv)
     exit_code = dye.dispatch("dye", args)
     out, err = capsys.readouterr()
     assert exit_code == Dye.EXIT_SUCCESS
-    # we should have some debug info
     assert "[debug]" in err
     assert out == f"{msg}\n"
 

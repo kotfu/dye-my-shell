@@ -29,9 +29,18 @@ from dye import Dye
 
 
 def bootstrap():
-    """made this so we can test it"""
-    if __name__ == "__main__":
-        sys.exit(Dye.main())
+    """entry point for the console script
+
+    Called directly by the console script entry point in pyproject.toml
+    when someone types `dye` at the command line.
+
+    This function exists because Dye.main needs early access to sys.argv before
+    we call argparser.parse_args. We use tests which pass argv to Dye.main,
+    so we'll pass it here also, instead of checking sys.argv inside of Dye.main
+    """
+    sys.exit(Dye.main(sys.argv[1:]))
 
 
-bootstrap()
+# support `python -m dye`
+if __name__ == "__main__":  # pragma: no cover
+    bootstrap()

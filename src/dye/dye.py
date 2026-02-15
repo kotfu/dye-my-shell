@@ -487,11 +487,13 @@ class Dye:
                 if element in self.OUTPUT_ELEMENTS:
                     colors[element] = styledef
                 else:
-                    self.debug_msg(f"'{element}' is not a valid output element")
+                    self.debug_msg(
+                        f"skipping invalid element in DYE_COLORS: '{element}'"
+                    )
             else:
                 # invalid syntax, too many equals signs
                 # ignore this clause
-                self.debug_msg(f"could not parse '{clause}' as a color definition")
+                self.debug_msg(f"skipping invalid expression in DYE_COLORS: '{clause}'")
         return colors
 
     def parse_args(self, argv=None):
@@ -505,6 +507,13 @@ class Dye:
         self.error_console
         self.print_console
         """
+        # we are doing a hack here because we have a chicken and egg problem
+        # we want debug messaging generated from set_output_elements(), but
+        # set_output_elements() has to run before parse_args() because it
+        # changes the color output of argparser. So.....
+        if isinstance(argv, list) and (("-d" in argv) or ("--debug" in argv)):
+            # this will get set again later too, which is OK
+            self.debug = True
         self.set_output_elements()
 
         argparser = self.argparser()
@@ -541,6 +550,7 @@ class Dye:
             raise DyeError("a theme is required and you specified --no-theme")
 
         if not required and args.no_theme:
+            self.debug_msg("skipping theme because --no-theme was specified")
             return Theme()
 
         fname = None
@@ -589,6 +599,7 @@ class Dye:
             raise DyeError("a pattern is required and you specified --no-pattern")
 
         if not required and args.no_pattern:
+            self.debug_msg("skipping pattern because --no-pattern was specified")
             return Pattern.loads(None, theme)
 
         fname = None

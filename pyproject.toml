@@ -62,7 +62,7 @@ dev = [
 where = ["src"]
 
 [project.scripts]
-dye = "dye.dye:Dye.main"
+dye = "dye.__main__:bootstrap"
 
 [project.urls]
 homepage = "https://github.com/kotfu/dye-your-shell"
