@@ -80,4 +80,4 @@ tasks.py          # invoke task definitions
 ## Dependencies
 
 Core: rich, rich_argparse, tomlkit, Jinja2, python-benedict
-Dev: pytest, pytest-mock, pytest-cov, pylint, ruff, invoke, build, twine
+Dev: pytest, pytest-mock, pytest-cov, ruff, invoke, build, twine
