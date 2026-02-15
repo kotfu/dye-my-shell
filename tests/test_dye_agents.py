@@ -39,7 +39,7 @@ def test_agents(dye_cmdline, capsys):
         "eza",
         "fzf",
         "iterm",
-        "gnu_ls",
+        "ls_colors",
         "shell",
     ]
     for agent in expected_agents:

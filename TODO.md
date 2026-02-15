@@ -1,7 +1,6 @@
 # TODO list for dye
 
 [ ] noctis theme ideas: https://github.com/liviuschera/noctis/pull/11
-[ ] figure out how to set emacs theme
 [ ] make iterm generator smart enabled, ie check if iterm is the terminal emulator
     and if not, don't generate any output, but maybe generate a comment
 [ ] make enabled_if and enabled generate more detailed comments
@@ -12,15 +11,13 @@
     If we change this, or make it an option, then we have to make sure to update
     'dye print' as well.
 [ ] make 'dye themes' show some basic info about each theme, type, description, etc.
-[ ] switch to uv
+[x] switch to uv
 [ ] add a command like apply that validates a pattern
     - description exists
     - prevent_themes is boolean if present
     - requires_theme refers to a file that exists
 [ ] make a 'dye patterns' command that lists out the patterns, need it for theme-activate() bash func
 [ ] see if we can download/convert/create our palettes from an online repository of color themes
-[ ] add generator for GREP_COLORS https://www.gnu.org/software/grep/manual/grep.html#index-GREP_005fCOLORS-environment-variable
-[ ] figure out how to add support for eza theme files
 [ ] make a filecopy generator, that just copies a file from one location to another, you can use
     this to support many tools which look at their own config file for color information, you
     create multiple config files, and this generator copies the one that matches your theme
@@ -40,18 +37,18 @@
 [ ] unit tests in test_pattern.py or test_scope.py for all the processing of a scope
 [ ] see if we can use pygments styles as a theme in dye
 [ ] make -d show debugging output on stderr so you can see what's going on
-[ ] create a generator for less, add to environment variable LESS
 
 ## agents
 
-[ ] ripgrep to set RG_COLORS
-[ ]
+[ ] agent for ripgrep to set RG_COLORS
+[ ] add agent for for GREP_COLORS https://www.gnu.org/software/grep/manual/grep.html#index-GREP_005fCOLORS-environment-variable
+[ ] figure out how to add support for eza theme files
+[ ] create an agent for less, add to environment variable LESS
+[ ] see if we can figure out how to make an emacs agent that sets the emacs theme
 
 
 ## documentation and website
   - show how to set BAT_THEME
-- document how to load a theme
-    - eval $(shell-themer) is bad, try the code from `$ starship init bash` instead
 - document a "magic" styles named "background", "foreground", and "text"
   - these will be used by the preview command to show the style properly
   - text should be foreground on background

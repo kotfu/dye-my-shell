@@ -45,7 +45,6 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
-    "build",
     "pytest",
     "pytest-mock",
     "pytest-cov",

@@ -7,7 +7,7 @@
 ## Development Setup
 
 ```bash
-pip install -e .[dev]     # install in editable mode with dev deps
+uv pip install -e .[dev]     # install in editable mode with dev deps
 ```
 
 Python 3.9+ required. Virtual env at `.venv/` (managed with uv).
@@ -16,9 +16,8 @@ Python 3.9+ required. Virtual env at `.venv/` (managed with uv).
 
 ```bash
 pytest                     # run tests (includes coverage via addopts)
-invoke check               # run ALL checks: pytest, pylint, ruff lint, ruff format check
+invoke check               # run ALL checks: pytest, ruff check, ruff format check
 invoke format              # format code with ruff
-pylint src tests           # lint with pylint
 ruff check *.py tests src  # lint with ruff
 ruff format *.py tests src # format with ruff
 ```
@@ -37,7 +36,6 @@ Always run `invoke check` before committing. All checks must pass.
 
 - Formatter/linter: ruff (line length 88, indent 4)
 - Ruff rules: E, F, UP, B, SIM, I (isort)
-- Also linted with pylint (duplicate-code disabled)
 - Imports: standard library, third-party, local (enforced by isort)
 - No type annotations enforcement but follow existing patterns
 
@@ -60,7 +58,7 @@ Always run `invoke check` before committing. All checks must pass.
 ```
 src/dye/          # source code
   dye.py          # main CLI class with arg parsing and command dispatch
-  agents.py       # agent implementations (Fzf, Eza, GnuLs, Iterm, Shell, etc.)
+  agents.py       # agent implementations (Fzf, Eza, LsColors, Iterm, Shell, etc.)
   pattern.py      # TOML pattern file loading and Jinja2 processing
   theme.py        # TOML theme file loading
   scope.py        # scope class for pattern sections
@@ -75,7 +73,7 @@ tasks.py          # invoke task definitions
 ## Architecture Notes
 
 - Agents use a plugin registry pattern via `AgentBase.__init_subclass__()` — new agents auto-register
-- Agent names derived from class names (e.g., `GnuLs` → `gnu_ls`)
+- Agent names derived from class names (e.g., `LsColors` → `ls_colors`)
 - Pattern/theme files are TOML with Jinja2 template support
 - Rich library used for all terminal output (tables, panels, styled text)
 

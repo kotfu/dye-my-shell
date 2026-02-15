@@ -15,11 +15,13 @@ and the format of this file follows recommendations from
 ### Changed
 
 - `dye preview` can now show patterns and styles
+- `gnu_ls` agent renamed `ls_colors`
 
 ### Removed
 
 - `--color` option removed from `dye` because you can't reliably set usage
-  colors from a command line option.
+  colors from a command line option. Use DYE_COLORS environment variable
+  instead.
 
 ### Fixed
 

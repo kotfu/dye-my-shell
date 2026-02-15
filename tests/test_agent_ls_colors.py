@@ -29,7 +29,7 @@ import dye
 from dye import Dye, Pattern
 
 #
-# test the gnu_ls agent
+# test the ls_colors agent
 #
 
 # we only reallly have to test that the style name maps to the right code in ls_colors
@@ -66,10 +66,10 @@ def test_ls_colors_from_style(name, styledef, expected):
     # so lets make a fake one
     pattern_str = """
     [scopes.myscope]
-    agent = "gnu_ls"
+    agent = "ls_colors"
     """
     pattern = Pattern.loads(pattern_str)
-    agent = dye.agents.GnuLs(pattern.scopes["myscope"])
+    agent = dye.agents.LsColors(pattern.scopes["myscope"])
     # now we can go test the render
     code, render = agent.ls_colors_from_style(
         name,
@@ -85,7 +85,7 @@ def test_ls_colors_from_style(name, styledef, expected):
 def test_ls_colors_no_styles(dye_cmdline, capsys):
     pattern_str = """
         [scopes.lsc]
-        agent = "gnu_ls"
+        agent = "ls_colors"
     """
     exit_code = dye_cmdline("apply", None, pattern_str)
     out, err = capsys.readouterr()
@@ -97,7 +97,7 @@ def test_ls_colors_no_styles(dye_cmdline, capsys):
 def test_ls_colors_unknown_style(dye_cmdline, capsys):
     pattern_str = """
         [scopes.lsc]
-        agent = "gnu_ls"
+        agent = "ls_colors"
         styles.bundleid = "default"
     """
     exit_code = dye_cmdline("apply", None, pattern_str)
@@ -110,7 +110,7 @@ def test_ls_colors_unknown_style(dye_cmdline, capsys):
 def test_ls_colors_environment_variable(dye_cmdline, capsys):
     pattern_str = """
         [scopes.lsc]
-        agent = "gnu_ls"
+        agent = "ls_colors"
         environment_variable = "OTHER_LS_COLOR"
         styles.file = "default"
     """
@@ -130,7 +130,7 @@ def test_ls_colors_styles_variables(dye_cmdline, capsys):
         warning = "yellow on red"
 
         [scopes.lsc]
-        agent = "gnu_ls"
+        agent = "ls_colors"
         styles.file = "{{styles.warning}}"
         styles.directory = "{{variables.pinkvar}}"
     """
@@ -144,7 +144,7 @@ def test_ls_colors_styles_variables(dye_cmdline, capsys):
 def test_ls_colors_clear_builtin(dye_cmdline, capsys):
     pattern_str = """
         [scopes.lsc]
-        agent = "gnu_ls"
+        agent = "ls_colors"
         clear_builtin = true
         styles.directory = "bright_blue"
     """
@@ -163,7 +163,7 @@ def test_ls_colors_clear_builtin(dye_cmdline, capsys):
 def test_ls_colors_clear_builtin_not_boolean(dye_cmdline, capsys):
     pattern_str = """
         [scopes.lsc]
-        agent = "gnu_ls"
+        agent = "ls_colors"
         clear_builtin = "error"
         style.directory = "bright_blue"
     """

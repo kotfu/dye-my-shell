@@ -41,7 +41,7 @@ class AgentBase(abc.ABC):
     class name, ie:
 
     EnvironmentVariables -> environment_variables
-    GnuLs -> gnu_ls
+    LsColors -> ls_colors
     """
 
     classmap = {}

@@ -36,6 +36,6 @@ from .dye import Dye
 from .environment_variables import EnvironmentVariables
 from .eza import Eza
 from .fzf import Fzf
-from .gnu_ls import GnuLs
 from .iterm import Iterm
+from .ls_colors import LsColors
 from .shell import Shell

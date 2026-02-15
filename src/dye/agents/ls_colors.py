@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-"""GNU ls agent for LS_COLORS"""
+"""LS_COLORS agent"""
 
 import rich.style
 
@@ -27,7 +27,7 @@ from ..exceptions import DyeSyntaxError
 from .base import AgentBase, LsColorsFromStyle
 
 
-class GnuLs(AgentBase, LsColorsFromStyle):
+class LsColors(AgentBase, LsColorsFromStyle):
     "Create LS_COLORS environment variable for use with GNU ls"
 
     LS_COLORS_BASE_MAP = {
