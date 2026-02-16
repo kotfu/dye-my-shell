@@ -8,6 +8,17 @@ and the format of this file follows recommendations from
 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
+## [Unreleased]
+
+### Added
+
+### Changed
+
+### Removed
+
+### Fixed
+
+
 ## [0.13.0] - 2026-02-16
 
 ### Added
