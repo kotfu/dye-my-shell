@@ -148,7 +148,7 @@ class Dye:
         wrapper to execute for us. agents can also write/move files,
         replace files or whatever else they are gonna do
 
-        output is suitable for `source < $(dye apply)`
+        output is suitable for `source <(dye apply)`
         """
         theme = self.load_theme_from_args(args, required=False)
         pattern = self.load_pattern_from_args(args, required=True, theme=theme)
@@ -675,10 +675,7 @@ class Dye:
             help=version_help,
         )
 
-        forcecolor_help = (
-            "force color output even if standard output is not a terminal"
-            " (i.e. if it's a file or a pipe to less)"
-        )
+        forcecolor_help = "force color output to files and pipes"
         parser.add_argument(
             "-F", "--force-color", action="store_true", help=forcecolor_help
         )
