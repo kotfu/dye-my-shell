@@ -137,28 +137,10 @@ class Dye:
             elif args.command == "themes":
                 exit_code = self.command_themes(args)
             else:
-                text = rich.text.Text()
-                text.append(
-                    f"{prog}: ",
-                    style=self.output_elements.get("error_progname"),
-                )
-                text.append(
-                    f"{args.command}: unknown command",
-                    style=self.output_elements.get("error_text"),
-                )
-                self.error_console.print(text)
+                self.error_msg(prog, f"{args.command}: unknown command")
                 exit_code = self.EXIT_USAGE
         except (DyeError, DyeSyntaxError) as err:
-            text = rich.text.Text()
-            text.append(
-                f"{prog}: ",
-                style=self.output_elements.get("error_progname"),
-            )
-            text.append(
-                str(err),
-                style=self.output_elements.get("error_text"),
-            )
-            self.error_console.print(text)
+            self.error_msg(prog, str(err))
             exit_code = self.EXIT_ERROR
 
         return exit_code
@@ -449,6 +431,16 @@ class Dye:
             highlight=False,
             force_terminal=force_color,
         )
+
+    def error_msg(self, prog, msg):
+        """print a styled error message to stderr"""
+        text = rich.text.Text()
+        text.append(
+            f"{prog}: ",
+            style=self.output_elements.get("error_progname"),
+        )
+        text.append(msg, style=self.output_elements.get("error_text"))
+        self.error_console.print(text)
 
     def debug_msg(self, msg):
         """print the message to stderr if debug is enabled"""
