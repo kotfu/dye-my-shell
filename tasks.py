@@ -172,8 +172,8 @@ namespace.add_task(build)
 
 @invoke.task(pre=[build])
 def pypi(context):
-    "Build and publish a distribution to pypi"
-    context.run("uv publish")
+    "Build and publish a distribution to https://pypi.org"
+    context.run("uvx uv-publish --index pypi")
 
 
 namespace.add_task(pypi)
@@ -182,7 +182,7 @@ namespace.add_task(pypi)
 @invoke.task(pre=[build])
 def pypi_test(context):
     "Build and publish a distribution to https://test.pypi.org"
-    context.run("uv publish --index test-pypi")
+    context.run("uvx uv-publish --index testpypi")
 
 
 namespace.add_task(pypi_test)
