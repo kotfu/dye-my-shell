@@ -28,7 +28,7 @@ from .base import AgentBase, LsColorsFromStyle
 
 
 class LsColors(AgentBase, LsColorsFromStyle):
-    "Create LS_COLORS environment variable for use with GNU ls"
+    "Create the LS_COLORS environment variable used by various tools"
 
     LS_COLORS_BASE_MAP = {
         # map both a friendly name and the "real" name
