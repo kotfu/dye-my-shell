@@ -52,6 +52,15 @@ def test_output_color_envs_only(dye_cmdline, mocker):
     assert not RichHelpFormatter.styles
 
 
+def test_output_color_no_color_env_empty(dye_cmdline, mocker, capsys):
+    # NO_COLOR set but empty should be ignored per no-color.org spec
+    mocker.patch.dict(os.environ, {"NO_COLOR": ""}, clear=True)
+    exit_code = dye_cmdline("-d --help")
+    out, err = capsys.readouterr()
+    assert exit_code == Dye.EXIT_SUCCESS
+    assert "ignoring NO_COLOR" in err
+
+
 def test_output_color_env_color(dye_cmdline, mocker):
     # DYE_COLORS should override default colors
     RichHelpFormatter.styles["argparse.text"] = "#333333"
