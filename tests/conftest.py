@@ -22,6 +22,8 @@
 # pylint: disable=protected-access, missing-function-docstring, redefined-outer-name
 # pylint: disable=missing-module-docstring, unused-variable
 
+import os
+
 import pytest
 import rich
 
@@ -29,7 +31,7 @@ from dye import Dye, Pattern, Theme
 
 
 @pytest.fixture
-def dye_cmdline(mocker):
+def dye_cmdline(mocker, monkeypatch):
     '''a fixture that simulates runing dye from the command line
 
     this fixture returns a function, which allows us to call
@@ -56,6 +58,12 @@ def dye_cmdline(mocker):
 
     Very convenient.
     '''
+    # scrub environment variables that affect dye's behavior
+    clean_env = {
+        k: v for k, v in os.environ.items() if not k.startswith(("DYE_", "NO_COLOR"))
+    }
+    monkeypatch.setattr(os, "environ", clean_env)
+
     # patch up the console objects so we get ansi output and don't wrap text
     console_patch = mocker.patch("dye.Dye._create_console")
     console_patch.return_value = rich.console.Console(
