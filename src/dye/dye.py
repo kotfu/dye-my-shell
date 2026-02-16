@@ -464,31 +464,46 @@ class Dye:
         DYE_COLORS=usage_args=red bold on black:usage_groups=white on red:
         """
         self.output_elements = benedict()
+        oe = benedict()
         try:
             env_colors = os.environ["DYE_COLORS"]
+            oe = self._parse_colorspec(env_colors)
+            self.debug_msg("parsed environment variable DYE_COLORS")
         except KeyError:
             env_colors = None
 
         # https://no-color.org/
         try:
             env_no_color = os.environ["NO_COLOR"]
+            if not env_no_color:
+                self.debug_msg(
+                    "ignoring NO_COLOR environment variable which is set, but empty"
+                )
         except KeyError:
             env_no_color = None
+            self.debug_msg("NO_COLOR environment variable is not set")
 
         if env_no_color:
             # help_styles = self._parse_colorspec("")
-            self.debug_msg("no color output because NO_COLOR is set")
+            self.debug_msg(
+                "no color output because NO_COLOR environment variable is set"
+            )
         elif env_colors:
             # was set, and was set to a non-empty string
-            self.output_elements = self._parse_colorspec(env_colors)
-            self.debug_msg("output colors set from $DYE_COLORS")
+            self.output_elements = oe
+            self.debug_msg("output colors set from DYE_COLORS environment variable")
         elif env_colors == "":
             # None is different than an empty string
             # disable the default color output
             # help_styles = self._parse_colorspec("")
-            self.debug_msg("no color output because $DYE_COLORS is an empty string")
+            self.debug_msg(
+                "no color output because DYE_COLORS environment"
+                " variable is an empty string"
+            )
         else:
-            self.debug_msg("no color output because $DYE_COLORS is not set")
+            self.debug_msg(
+                "no color output because DYE_COLORS environment variable is not set"
+            )
 
         # transfer the usage elements into RichHelpFormatter
         RichHelpFormatter.styles = {}
@@ -635,7 +650,7 @@ class Dye:
         else:
             with contextlib.suppress(KeyError):
                 fname = os.environ["DYE_PATTERN_FILE"]
-                self.debug_msg(f"found pattern '{fname}' in $DYE_PATTERN_FILE")
+                self.debug_msg(f"found pattern '{fname}' in DYE_PATTERN_FILE")
 
         if fname:
             with open(os.path.expanduser(fname), "rb") as fobj:
