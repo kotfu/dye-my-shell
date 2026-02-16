@@ -12,6 +12,9 @@ and the format of this file follows recommendations from
 
 ### Added
 
+- new `dye elements` command to show all the parts of the dye output that
+  you can assign colors to in the DYE_COLORS environment variable
+
 ### Changed
 
 ### Removed

@@ -54,23 +54,23 @@ class Dye:
 
     # we call these ELEMENTS instead of STYLES because we already use STYLES for
     # something else
-    OUTPUT_ELEMENTS = [
-        "usage_args",
-        "usage_groups",
-        "usage_help",
-        "usage_metavar",
-        "usage_prog",
-        "usage_syntax",
-        "usage_text",
-        "ui_border",
-        "ui_column_header",
-        "error_progname",
-        "error_text",
-        "debug_label",
-        "debug_text",
-        "comment_begin",
-        "comment_text",
-    ]
+    OUTPUT_ELEMENTS = {
+        "comment_begin": "comment delimiter at the start of a comment line",
+        "comment_text": "text content of comment lines",
+        "debug_label": "the [debug] label prefix on debug messages",
+        "debug_text": "text content of debug messages",
+        "error_progname": "program name shown in error messages",
+        "error_text": "text content of error messages",
+        "ui_border": "borders of tables and panels",
+        "ui_column_header": "column headers in tables",
+        "usage_args": "argument names in usage help",
+        "usage_groups": "group headings in usage help",
+        "usage_help": "help text descriptions in usage help",
+        "usage_metavar": "metavar placeholders in usage help",
+        "usage_prog": "program name in usage help",
+        "usage_syntax": "syntax characters in usage help",
+        "usage_text": "general text in usage help",
+    }
 
     #
     # initialization and properties
@@ -134,6 +134,8 @@ class Dye:
                 exit_code = self.command_print(args)
             elif args.command == "agents":
                 exit_code = self.command_agents(args)
+            elif args.command == "elements":
+                exit_code = self.command_elements(args)
             elif args.command == "themes":
                 exit_code = self.command_themes(args)
             else:
@@ -342,6 +344,31 @@ class Dye:
         # table,
         # border_style="yellow on blue",
         # )
+
+        self.console.print(table)
+
+        return self.EXIT_SUCCESS
+
+    def command_elements(self, _):
+        """list all output elements and a short description of each"""
+        border_style = None
+        with contextlib.suppress(KeyError):
+            border_style = self.output_elements["ui_border"]
+
+        header_style = None
+        with contextlib.suppress(KeyError):
+            header_style = self.output_elements["ui_column_header"]
+
+        table = rich.table.Table(
+            box=rich.box.ROUNDED,
+            border_style=border_style,
+            header_style=header_style,
+        )
+        table.add_column("Element")
+        table.add_column("Description")
+
+        for element in sorted(self.OUTPUT_ELEMENTS):
+            table.add_row(element, self.OUTPUT_ELEMENTS[element])
 
         self.console.print(table)
 
@@ -738,6 +765,7 @@ class Dye:
         self._argparser_preview(subparsers)
         self._argparser_print(subparsers)
         self._argparser_agents(subparsers)
+        self._argparser_elements(subparsers)
         self._argparser_themes(subparsers)
         self._argparser_help(subparsers)
 
@@ -845,6 +873,16 @@ class Dye:
             description=agents_help,
             formatter_class=RichHelpFormatter,
             help=agents_help,
+        )
+
+    def _argparser_elements(self, subparsers):
+        """Add a subparser for the elements command"""
+        elements_help = "list all output elements for DYE_COLORS"
+        subparsers.add_parser(
+            "elements",
+            description=elements_help,
+            formatter_class=RichHelpFormatter,
+            help=elements_help,
         )
 
     def _argparser_themes(self, subparsers):
