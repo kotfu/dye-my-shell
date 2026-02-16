@@ -8,11 +8,12 @@ and the format of this file follows recommendations from
 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased]
+## [0.13.0] - 2026-02-16
 
 ### Added
 
-- you can now change the colors of dye error messages, comments, and debug messages
+- you can now change the colors of dye error messages, comments, and debug
+  messages using the DYE_COLORS environment variable
 
 ### Changed
 
