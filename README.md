@@ -1,4 +1,4 @@
-# dye-your-shell
+# dye-my-shell
 
 activate color output in shell commands using themes and patterns
 
@@ -19,7 +19,7 @@ With enough fiddling, you can get your shell init scripts to make all these tool
 use a similar color scheme, but if you want to change it, you've got a lot of work
 ahead.
 
-`dye-your-shell` installs a command line program named `dye` to do its work.
+`dye-my-shell` installs a command line program named `dye` to do its work.
 
 `dye` reads a configuration file containing a set of colors, and instructions on how to
 apply those colors to as many command line tools as can support it. This configuration
@@ -108,9 +108,16 @@ style.query = "pink"
 
 ## Installation
 
-You'll need python version 3.9 or higher. Install with [pipx](https://pipx.pypa.io/stable/):
+```bash
+$ uv tool install dye-my-shell
 ```
-$ pipx install dye-your-shell
+
+If you don't use uv, maybe you should give it a try. Or, you can install
+`python` yourself, and then install `dye-my-shell` with
+[pipx](https://pipx.pypa.io/stable/)
+
+```bash
+$ pipx install dye-my-shell
 ```
 
 You need a *nix-ish bash shell environment. Probably works in Windows Subsystem

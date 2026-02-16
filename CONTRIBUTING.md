@@ -4,7 +4,7 @@
 
 Clone the repo from github:
 ```
-$ git clone git@github.com:kotfu/dye-your-shell.git
+$ git clone git@github.com:kotfu/dye-my-shell.git
 ```
 
 
@@ -160,12 +160,15 @@ following:
 
 12. Switch to the **main** branch in your local repo.
 
-13. Build source distribution, wheel distribution, and upload them to testpypi:
+13. Build distribution and upload it to test.pypi.org.
+    This project uses uv-publish, so your credentials will be retrieved from ~/.pypirc
 ```
 $ invoke pypi-test
 ```
 
-1.  Build source distribution, wheel distribution, and upload them to pypi:
+14.  Build distribution and upload it to pypi:
+    This project uses uv-publish, so your credentials will be retrieved from ~/.pypirc
+
 ```
 $ invoke pypi
 ```

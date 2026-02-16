@@ -2,14 +2,13 @@
 [build-system]
 requires = [
     "setuptools>=64",
-    "wheel",
     "setuptools-scm>=8"
 ]
 build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "dye-your-shell"
+name = "dye-my-shell"
 description = "Apply color themes to a variety of shell command line tools."
 readme = "README.md"
 authors = [
@@ -65,8 +64,8 @@ where = ["src"]
 dye = "dye.__main__:bootstrap"
 
 [project.urls]
-homepage = "https://github.com/kotfu/dye-your-shell"
-repository = "https://github.com/kotfu/dye-your-shell"
+homepage = "https://github.com/kotfu/dye-my-shell"
+repository = "https://github.com/kotfu/dye-my-shell"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

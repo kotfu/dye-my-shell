@@ -44,7 +44,7 @@ def version_string():
     """return a version string suitable for display to a user"""
     try:
         # this is the distribution name, not the package name
-        ver = metadata.version("dye-your-shell")
+        ver = metadata.version("dye-my-shell")
     except metadata.PackageNotFoundError:  # pragma: nocover
         ver = "unknown"
     return ver

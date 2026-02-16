@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to [dye-your-shell](https://github.com/kotfu/dye-your-shell)
+All notable changes to [dye-my-shell](https://github.com/kotfu/dye-my-shell)
 are documented in this file.
 
 This project uses [Semantic Versioning](http://semver.org/spec/v2.0.0.html)
@@ -16,6 +16,7 @@ and the format of this file follows recommendations from
 
 ### Changed
 
+- distribution and repo are now `dye-my-shell` instead of `dye-your-shell`
 - `dye preview` can now show patterns and styles
 - `gnu_ls` agent renamed `ls_colors`
 

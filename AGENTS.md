@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-`dye-your-shell` is a Python CLI tool that applies color themes to shell tools (fzf, bat, eza, GNU ls, iTerm, etc.) using TOML pattern/theme files with Jinja2 templating. Entry point: `dye = "dye.dye:Dye.main"`.
+`dye-my-shell` is a Python CLI tool that applies color themes to shell tools (fzf, bat, eza, GNU ls, iTerm, etc.) using TOML pattern/theme files with Jinja2 templating. Entry point: `dye.__main__:bootstrap`.
 
 ## Development Setup
 
