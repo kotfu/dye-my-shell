@@ -112,6 +112,12 @@ def test_dye_all_elements(dye_cmdline, capsys):
         style.usage_text = "#f8f8f2"
         style.ui_border = "#bd93f9"
         style.ui_column_header = "bold #ff79c6"
+        style.error_progname = "bold #ff5555"
+        style.error_text = "#ff5555"
+        style.debug_label = "bold #6272a4"
+        style.debug_text = "#6272a4"
+        style.comment_begin = "bold #6272a4"
+        style.comment_text = "#6272a4"
     """
     exit_code = dye_cmdline("apply", None, pattern_str)
     out, err = capsys.readouterr()

@@ -22,6 +22,8 @@
 # pylint: disable=protected-access, missing-function-docstring, redefined-outer-name
 # pylint: disable=missing-module-docstring, unused-variable
 
+import os
+
 import pytest
 
 from dye import Dye
@@ -255,3 +257,30 @@ def test_comments(dye_cmdline, capsys):
     assert "# scope 'somevar'" in lines
     assert "unset SOMEVAR" in lines
     assert "unset NOLISTVAR" not in lines
+
+
+def test_comments_styled(dye_cmdline, mocker, capsys):
+    mocker.patch.dict(
+        os.environ,
+        {"DYE_COLORS": "comment_begin=red:comment_text=#00ff00"},
+    )
+    pattern_str = """
+        [scopes.nolistvar]
+        enabled = false
+        agent = "environment_variables"
+        unset = "NOLISTVAR"
+
+        [scopes.somevar]
+        enabled = true
+        agent = "environment_variables"
+        unset = "SOMEVAR"
+    """
+    exit_code = dye_cmdline("apply --comment", None, pattern_str)
+    out, err = capsys.readouterr()
+    assert exit_code == Dye.EXIT_SUCCESS
+    assert not err
+    assert "scope 'nolistvar' skipped" in out
+    assert "scope 'somevar'" in out
+    assert "unset SOMEVAR" in out
+    # ANSI escape codes should be present because styles are applied
+    assert "\x1b[" in out

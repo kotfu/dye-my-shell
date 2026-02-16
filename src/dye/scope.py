@@ -26,6 +26,7 @@ import subprocess
 
 import jinja2
 import rich
+import rich.text
 from benedict import benedict
 
 from .agents import AgentBase
@@ -49,6 +50,8 @@ class Scope:
 
         scope.run_agent()
     """
+
+    COMMENT_BEGIN = "# "
 
     #
     # initialization and properties
@@ -156,21 +159,38 @@ class Scope:
 
         self.styles = processed_styles
 
-    def run_agent(self, comments=False):
+    def run_agent(self, comments=False, console=None, output_elements=None):
         """
         returns output consisting of shell commands which must
         be sourced in the current shell in order to become active
         """
         if self._enabled():
             if comments:
-                print(f"# scope '{self.name}'")
+                self._print_comment(f"scope '{self.name}'", console, output_elements)
             # run the agent, printing any shell commands it returns
             output = self.agent.run(comments)
             if output:
                 print(output)
         else:
             if comments:
-                print(f"# scope '{self.name}' skipped because it is not enabled")
+                self._print_comment(
+                    f"scope '{self.name}' skipped because it is not enabled",
+                    console,
+                    output_elements,
+                )
+
+    def _print_comment(self, msg, console=None, output_elements=None):
+        """print a comment line with optional styling"""
+        if console and output_elements:
+            text = rich.text.Text()
+            text.append(
+                self.COMMENT_BEGIN,
+                style=output_elements.get("comment_begin"),
+            )
+            text.append(msg, style=output_elements.get("comment_text"))
+            console.print(text)
+        else:
+            print(f"{self.COMMENT_BEGIN}{msg}")
 
     def _enabled(self):
         """Determine if the scope is enabled

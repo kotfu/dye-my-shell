@@ -12,6 +12,8 @@ and the format of this file follows recommendations from
 
 ### Added
 
+- you can now change the colors of dye error messages, comments, and debug messages
+
 ### Changed
 
 - `dye preview` can now show patterns and styles

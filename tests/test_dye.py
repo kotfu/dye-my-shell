@@ -26,6 +26,7 @@ import os
 
 import pytest
 import rich
+import rich.text
 from rich_argparse import RichHelpFormatter
 
 from dye import Dye, DyeError
@@ -263,6 +264,95 @@ def test_dispatch_unknown_command(capsys):
     assert exit_code == Dye.EXIT_USAGE
     assert not out
     assert "unknown command" in err
+
+
+def test_error_styled_unknown_command(mocker, capsys):
+    create_error_console = mocker.patch("dye.Dye._create_error_console")
+    create_error_console.return_value = rich.console.Console(
+        stderr=True,
+        soft_wrap=True,
+        markup=False,
+        emoji=False,
+        highlight=False,
+        color_system="truecolor",
+        width=2048,
+    )
+    mocker.patch.dict(
+        os.environ,
+        {"DYE_COLORS": "error_progname=red:error_text=#00ff00"},
+        clear=True,
+    )
+    dye = Dye()
+    argv = ["agents"]
+    (_, args) = dye.parse_args(argv)
+    args.command = "fredflintstone"
+    exit_code = dye.dispatch("dye", args)
+    out, err = capsys.readouterr()
+    assert exit_code == Dye.EXIT_USAGE
+    assert not out
+    assert "unknown command" in err
+    # ANSI escape codes should be present because styles are applied
+    assert "\x1b[" in err
+
+
+def test_error_styled_exception(mocker, capsys):
+    create_error_console = mocker.patch("dye.Dye._create_error_console")
+    create_error_console.return_value = rich.console.Console(
+        stderr=True,
+        soft_wrap=True,
+        markup=False,
+        emoji=False,
+        highlight=False,
+        color_system="truecolor",
+        width=2048,
+    )
+    mocker.patch.dict(
+        os.environ,
+        {"DYE_COLORS": "error_progname=red:error_text=#00ff00"},
+        clear=True,
+    )
+    dye = Dye()
+    argv = ["agents"]
+    (_, args) = dye.parse_args(argv)
+    # mock command_agents to raise a DyeError
+    mocker.patch.object(dye, "command_agents", side_effect=DyeError("test error"))
+    exit_code = dye.dispatch("dye", args)
+    out, err = capsys.readouterr()
+    assert exit_code == Dye.EXIT_ERROR
+    assert not out
+    assert "test error" in err
+    assert "dye: " in err
+    # ANSI escape codes should be present because styles are applied
+    assert "\x1b[" in err
+
+
+def test_debug_styled_output(mocker, capsys):
+    create_error_console = mocker.patch("dye.Dye._create_error_console")
+    create_error_console.return_value = rich.console.Console(
+        stderr=True,
+        soft_wrap=True,
+        markup=False,
+        emoji=False,
+        highlight=False,
+        color_system="truecolor",
+        width=2048,
+    )
+    mocker.patch.dict(
+        os.environ,
+        {"DYE_COLORS": "debug_label=red:debug_text=#00ff00"},
+        clear=True,
+    )
+    dye = Dye()
+    msg = "Hello there. General Kenobi."
+    argv = ["-d", "print", "--no-theme", "--no-pattern", msg]
+    (_, args) = dye.parse_args(argv)
+    exit_code = dye.dispatch("dye", args)
+    out, err = capsys.readouterr()
+    assert exit_code == Dye.EXIT_SUCCESS
+    assert "[debug]" in err
+    assert msg in out
+    # ANSI escape codes should be present because styles are applied
+    assert "\x1b[" in err
 
 
 def test___main__(mocker):

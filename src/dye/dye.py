@@ -34,6 +34,7 @@ import rich.errors
 import rich.layout
 import rich.rule
 import rich.style
+import rich.text
 from benedict import benedict
 from rich_argparse import RichHelpFormatter
 
@@ -63,6 +64,12 @@ class Dye:
         "usage_text",
         "ui_border",
         "ui_column_header",
+        "error_progname",
+        "error_text",
+        "debug_label",
+        "debug_text",
+        "comment_begin",
+        "comment_text",
     ]
 
     #
@@ -130,10 +137,28 @@ class Dye:
             elif args.command == "themes":
                 exit_code = self.command_themes(args)
             else:
-                self.error_console.print(f"{prog}: {args.command}: unknown command")
+                text = rich.text.Text()
+                text.append(
+                    f"{prog}: ",
+                    style=self.output_elements.get("error_progname"),
+                )
+                text.append(
+                    f"{args.command}: unknown command",
+                    style=self.output_elements.get("error_text"),
+                )
+                self.error_console.print(text)
                 exit_code = self.EXIT_USAGE
         except (DyeError, DyeSyntaxError) as err:
-            self.error_console.print(f"{prog}: {err}")
+            text = rich.text.Text()
+            text.append(
+                f"{prog}: ",
+                style=self.output_elements.get("error_progname"),
+            )
+            text.append(
+                str(err),
+                style=self.output_elements.get("error_text"),
+            )
+            self.error_console.print(text)
             exit_code = self.EXIT_ERROR
 
         return exit_code
@@ -164,7 +189,7 @@ class Dye:
                 scope = pattern.scopes[scope_name]
             except KeyError as exc:
                 raise DyeError(f"{scope_name}: no such scope") from exc
-            scope.run_agent(args.comment)
+            scope.run_agent(args.comment, self.console, self.output_elements)
         return self.EXIT_SUCCESS
 
     def command_preview(self, args):
@@ -428,7 +453,16 @@ class Dye:
     def debug_msg(self, msg):
         """print the message to stderr if debug is enabled"""
         if self.debug:
-            self.error_console.print(f"[debug] {msg}")
+            text = rich.text.Text()
+            text.append(
+                "[debug] ",
+                style=self.output_elements.get("debug_label"),
+            )
+            text.append(
+                msg,
+                style=self.output_elements.get("debug_text"),
+            )
+            self.error_console.print(text)
 
     def set_output_elements(self):
         """set the color elements for all our output
